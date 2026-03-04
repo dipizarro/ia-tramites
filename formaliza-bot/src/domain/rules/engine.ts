@@ -1,9 +1,12 @@
 import { Slots } from '../slot-extractor';
+import { ChecklistItem, WarningItem } from '../chat.schema';
 
 export interface Condition {
-    slot: string;
-    op: '==' | '!=' | 'in' | 'exists';
+    slot?: string;
+    op: '==' | '!=' | 'in' | 'exists' | '>' | '<' | '>=' | '<=';
     value?: any;
+    fn?: 'date_diff_days';
+    args?: string[];
 }
 
 export interface RuleCondition {
@@ -13,7 +16,10 @@ export interface RuleCondition {
 
 export interface RuleAction {
     type: 'ask' | 'add_checklist_item' | 'add_warning';
-    message: string;
+    message?: string;
+    title?: string;
+    detail?: string;
+    links?: string[];
 }
 
 export interface Rule {
@@ -29,8 +35,8 @@ export interface RuleSet {
 
 export interface EvaluatedResult {
     next_questions: string[];
-    checklist: string[];
-    warnings: string[];
+    checklist: ChecklistItem[];
+    warnings: WarningItem[];
 }
 
 export class RuleEngine {
@@ -56,12 +62,20 @@ export class RuleEngine {
 
             if (matches) {
                 for (const action of rule.then) {
-                    if (action.type === 'ask') {
+                    if (action.type === 'ask' && action.message) {
                         result.next_questions.push(action.message);
-                    } else if (action.type === 'add_checklist_item') {
-                        result.checklist.push(action.message);
-                    } else if (action.type === 'add_warning') {
-                        result.warnings.push(action.message);
+                    } else if (action.type === 'add_checklist_item' && action.title && action.detail) {
+                        result.checklist.push({
+                            title: action.title,
+                            detail: action.detail,
+                            links: action.links || []
+                        });
+                    } else if (action.type === 'add_warning' && action.title && action.detail) {
+                        result.warnings.push({
+                            title: action.title,
+                            detail: action.detail,
+                            links: action.links || []
+                        });
                     }
                 }
             }
@@ -71,20 +85,43 @@ export class RuleEngine {
     }
 
     private evaluateCondition(slots: Slots, cond: Condition): boolean {
-        const slotValue = slots[cond.slot];
+        if (cond.fn === 'date_diff_days' && cond.args && cond.args.length === 2) {
+            const arg1 = cond.args[0] === 'today' ? new Date().toISOString().split('T')[0] : slots[cond.args[0]];
+            const arg2 = cond.args[1] === 'today' ? new Date().toISOString().split('T')[0] : slots[cond.args[1]];
 
-        switch (cond.op) {
+            if (!arg1 || !arg2) return false;
+
+            const d1 = new Date(arg1);
+            const d2 = new Date(arg2);
+
+            // date_diff_days(start_date, today) => today - start_date
+            const diffTime = d2.getTime() - d1.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            return this.compare(diffDays, cond.op, cond.value);
+        }
+
+        if (cond.slot) {
+            const slotValue = slots[cond.slot];
+            return this.compare(slotValue, cond.op, cond.value);
+        }
+
+        return false;
+    }
+
+    private compare(left: any, op: string, right: any): boolean {
+        switch (op) {
+            case '==': return left === right;
+            case '!=': return left !== right;
+            case 'in': return Array.isArray(right) && right.includes(left);
+            case '>': return left > right;
+            case '<': return left < right;
+            case '>=': return left >= right;
+            case '<=': return left <= right;
             case 'exists':
-                const exists = slotValue !== undefined && slotValue !== null && slotValue !== '';
-                return cond.value === true ? exists : !exists;
-            case '==':
-                return slotValue === cond.value;
-            case '!=':
-                return slotValue !== cond.value;
-            case 'in':
-                return Array.isArray(cond.value) && cond.value.includes(slotValue);
-            default:
-                return false;
+                const exists = left !== undefined && left !== null && left !== '';
+                return right === true ? exists : !exists;
+            default: return false;
         }
     }
 }

@@ -28,6 +28,56 @@ export class SlotExtractor {
             }
         }
 
+        // Commune extraction
+        const communeMatch = msg.match(/(?:en|soy de)\s+([a-záéíóúñ\s]+)/i);
+        if (communeMatch && !newSlots.commune) {
+            newSlots.commune = communeMatch[1].trim();
+        }
+
+        // RUT extraction
+        if (msg.includes('si tengo rut') || msg.includes('sí tengo rut') || msg.includes('tengo rut')) {
+            if (!msg.includes('no tengo rut')) {
+                newSlots.has_rut = true;
+            }
+        }
+        if (msg.includes('no tengo rut')) {
+            newSlots.has_rut = false;
+        }
+
+        // SII Password extraction
+        if (msg.includes('tengo clave sii') || msg.includes('clave tributaria')) {
+            if (!msg.includes('no tengo clave')) {
+                newSlots.has_sii_password = true;
+            }
+        }
+        if (msg.includes('no tengo clave') || msg.includes('no tengo clave sii')) {
+            newSlots.has_sii_password = false;
+        }
+
+        // Start Date extraction
+        if (!newSlots.start_date) {
+            const isoMatch = msg.match(/\b(\d{4}-\d{2}-\d{2})\b/);
+            if (isoMatch) {
+                newSlots.start_date = isoMatch[1];
+            } else {
+                const daysMatch = msg.match(/hace (\d+) d[ií]as?/);
+                if (daysMatch) {
+                    const days = parseInt(daysMatch[1], 10);
+                    const d = new Date();
+                    d.setDate(d.getDate() - days);
+                    newSlots.start_date = d.toISOString().split('T')[0];
+                } else {
+                    const monthsMatch = msg.match(/hace (\d+) meses?/);
+                    if (monthsMatch) {
+                        const months = parseInt(monthsMatch[1], 10);
+                        const d = new Date();
+                        d.setDate(d.getDate() - (months * 30));
+                        newSlots.start_date = d.toISOString().split('T')[0];
+                    }
+                }
+            }
+        }
+
         return newSlots;
     }
 }

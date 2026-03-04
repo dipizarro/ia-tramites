@@ -20,6 +20,34 @@
             ]
         },
         {
+            "id": "ask_commune",
+            "priority": 95,
+            "when": {
+                "all": [
+                    {
+                        "slot": "commune",
+                        "op": "exists",
+                        "value": false
+                    },
+                    {
+                        "slot": "activity_type",
+                        "op": "in",
+                        "value": [
+                            "physical_goods",
+                            "food",
+                            "mixed"
+                        ]
+                    }
+                ]
+            },
+            "then": [
+                {
+                    "type": "ask",
+                    "message": "¿En qué comuna operarás principalmente? (Ej: en Santiago)"
+                }
+            ]
+        },
+        {
             "id": "check_patente_municipal",
             "priority": 90,
             "when": {
@@ -39,7 +67,9 @@
             "then": [
                 {
                     "type": "add_checklist_item",
-                    "message": "Revisar patente municipal en tu comuna"
+                    "title": "Patente municipal",
+                    "detail": "Revisar patente municipal en tu comuna.",
+                    "links": []
                 }
             ]
         },
@@ -58,7 +88,11 @@
             "then": [
                 {
                     "type": "add_warning",
-                    "message": "probablemente permisos sanitarios"
+                    "title": "Revisión Sanitaria",
+                    "detail": "Probablemente necesites permisos sanitarios (Seremi de Salud).",
+                    "links": [
+                        "https://seremi.cl"
+                    ]
                 }
             ]
         },
@@ -77,7 +111,80 @@
             "then": [
                 {
                     "type": "add_checklist_item",
-                    "message": "Definir emisión de documentos (boleta/factura)"
+                    "title": "Documentos",
+                    "detail": "Definir emisión de documentos (boleta/factura).",
+                    "links": []
+                }
+            ]
+        },
+        {
+            "id": "check_rut",
+            "priority": 60,
+            "when": {
+                "all": [
+                    {
+                        "slot": "has_rut",
+                        "op": "==",
+                        "value": false
+                    }
+                ]
+            },
+            "then": [
+                {
+                    "type": "add_checklist_item",
+                    "title": "Obtener RUT",
+                    "detail": "Debes iniciar actividades y obtener RUT.",
+                    "links": [
+                        "https://homer.sii.cl/"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "check_clave_sii",
+            "priority": 50,
+            "when": {
+                "all": [
+                    {
+                        "slot": "has_sii_password",
+                        "op": "==",
+                        "value": false
+                    }
+                ]
+            },
+            "then": [
+                {
+                    "type": "add_checklist_item",
+                    "title": "Clave Tributaria",
+                    "detail": "Obtener/activar Clave Tributaria SII.",
+                    "links": [
+                        "https://zeus.sii.cl/"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "warn_plazo_inicio_actividades",
+            "priority": 40,
+            "when": {
+                "all": [
+                    {
+                        "fn": "date_diff_days",
+                        "args": [
+                            "start_date",
+                            "today"
+                        ],
+                        "op": ">",
+                        "value": 62
+                    }
+                ]
+            },
+            "then": [
+                {
+                    "type": "add_warning",
+                    "title": "Plazo finalizado",
+                    "detail": "El aviso de Inicio de Actividades debe hacerse dentro de los 2 meses siguientes al comienzo. Si ya pasó ese plazo, conviene regularizarlo lo antes posible.",
+                    "links": []
                 }
             ]
         }

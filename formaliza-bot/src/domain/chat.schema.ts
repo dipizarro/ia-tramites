@@ -7,12 +7,27 @@ export const chatRequestSchema = z.object({
 
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
 
+const checklistItemSchema = z.object({
+    title: z.string(),
+    detail: z.string(),
+    links: z.array(z.string()).default([])
+});
+
+const warningItemSchema = z.object({
+    title: z.string(),
+    detail: z.string(),
+    links: z.array(z.string()).default([])
+});
+
+export type ChecklistItem = z.infer<typeof checklistItemSchema>;
+export type WarningItem = z.infer<typeof warningItemSchema>;
+
 export const chatResponseSchema = z.object({
     reply: z.string(),
     slots: z.record(z.any()).optional(),
     next_questions: z.array(z.string()).optional(),
-    checklist: z.array(z.string()).optional(),
-    warnings: z.array(z.string()).optional()
+    checklist: z.array(checklistItemSchema).optional(),
+    warnings: z.array(warningItemSchema).optional()
 });
 
 export type ChatResponse = z.infer<typeof chatResponseSchema>;

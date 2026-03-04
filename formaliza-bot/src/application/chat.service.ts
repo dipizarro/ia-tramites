@@ -30,7 +30,8 @@ export class ChatService {
         if (evalResult.next_questions.length > 0) {
             reply = evalResult.next_questions[0];
         } else {
-            reply = "Listo, te dejo los próximos pasos.\n\n" + evalResult.checklist.slice(0, 3).map(i => `- ${i}`).join('\n');
+            const listText = evalResult.checklist.slice(0, 5).map(i => `- ${i.title}: ${i.detail}`).join('\n');
+            reply = "Listo, te dejo los próximos pasos:\n\n" + listText;
         }
 
         session.slots = newSlots;
