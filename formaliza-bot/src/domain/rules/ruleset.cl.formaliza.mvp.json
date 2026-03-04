@@ -1,0 +1,85 @@
+{
+    "rules": [
+        {
+            "id": "ask_activity_type",
+            "priority": 100,
+            "when": {
+                "all": [
+                    {
+                        "slot": "activity_type",
+                        "op": "exists",
+                        "value": false
+                    }
+                ]
+            },
+            "then": [
+                {
+                    "type": "ask",
+                    "message": "¿Qué vendes principalmente? (1) productos físicos (2) servicios digitales (3) comida (4) mixto"
+                }
+            ]
+        },
+        {
+            "id": "check_patente_municipal",
+            "priority": 90,
+            "when": {
+                "any": [
+                    {
+                        "slot": "activity_type",
+                        "op": "==",
+                        "value": "physical_goods"
+                    },
+                    {
+                        "slot": "activity_type",
+                        "op": "==",
+                        "value": "food"
+                    }
+                ]
+            },
+            "then": [
+                {
+                    "type": "add_checklist_item",
+                    "message": "Revisar patente municipal en tu comuna"
+                }
+            ]
+        },
+        {
+            "id": "warn_permisos_sanitarios",
+            "priority": 80,
+            "when": {
+                "all": [
+                    {
+                        "slot": "activity_type",
+                        "op": "==",
+                        "value": "food"
+                    }
+                ]
+            },
+            "then": [
+                {
+                    "type": "add_warning",
+                    "message": "probablemente permisos sanitarios"
+                }
+            ]
+        },
+        {
+            "id": "check_emision_documentos",
+            "priority": 70,
+            "when": {
+                "all": [
+                    {
+                        "slot": "sales_channel",
+                        "op": "==",
+                        "value": "instagram"
+                    }
+                ]
+            },
+            "then": [
+                {
+                    "type": "add_checklist_item",
+                    "message": "Definir emisión de documentos (boleta/factura)"
+                }
+            ]
+        }
+    ]
+}
