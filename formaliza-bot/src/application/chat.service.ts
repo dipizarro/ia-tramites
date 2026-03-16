@@ -57,4 +57,13 @@ export class ChatService {
     public async getSession(sessionId: string) {
         return await this.sessionStore.get(sessionId);
     }
+
+    public async buildSummaryForSession(session: any) {
+        // Evaluate existing slots to rebuild the exact context and evidences
+        const evalResult = this.ruleEngine.evaluateRules(session.slots || {}, this.ruleset);
+        
+        // Use Summary Builder to build the required API payload
+        const { SummaryBuilder } = require('./summary-builder');
+        return SummaryBuilder.buildSummary(session, evalResult);
+    }
 }

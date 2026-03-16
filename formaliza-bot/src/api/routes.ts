@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ChatService } from '../application/chat.service';
 import { chatRequestSchema } from '../domain/chat.schema';
+import { SummaryBuilder } from '../application/summary-builder';
 
 export async function setupRoutes(fastify: FastifyInstance) {
     const chatService = new ChatService();
@@ -21,6 +22,26 @@ export async function setupRoutes(fastify: FastifyInstance) {
             return reply.send(session);
         } catch (error) {
             request.log.error(error, 'Error fetching session');
+            return reply.status(500).send({ error: 'Internal Server Error' });
+        }
+    });
+
+    fastify.get('/summary/:sessionId', async (request: FastifyRequest<{ Params: { sessionId: string } }>, reply: FastifyReply) => {
+        try {
+            const { sessionId } = request.params;
+            const session = await chatService.getSession(sessionId);
+
+            if (!session) {
+                return reply.status(404).send({ error: 'Session not found' });
+            }
+
+            // Reprocesar las reglas estaticamente usando el motor que tiene chatService mediante helper si fuese un caso de uso.
+            // Aqui podemos inyectar un metodo buildSummary en chat service o recrearlo:
+            const summary = await chatService.buildSummaryForSession(session);
+            
+            return reply.send(summary);
+        } catch (error) {
+            request.log.error(error, 'Error building summary');
             return reply.status(500).send({ error: 'Internal Server Error' });
         }
     });

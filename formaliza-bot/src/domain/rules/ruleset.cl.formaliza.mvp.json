@@ -72,7 +72,8 @@
                     "type": "add_checklist_item",
                     "title": "Patente municipal",
                     "detail": "Revisar patente municipal en tu comuna.",
-                    "links": []
+                    "links": [],
+                    "evidence": ["D.L. N° 3.063 sobre Rentas Municipales (Art. 23)"]
                 }
             ]
         },
@@ -95,7 +96,8 @@
                     "detail": "Probablemente necesites permisos sanitarios (Seremi de Salud).",
                     "links": [
                         "https://seremi.cl"
-                    ]
+                    ],
+                    "evidence": ["Decreto 977: Reglamento Sanitario de los Alimentos"]
                 }
             ]
         },
@@ -116,7 +118,8 @@
                     "type": "add_checklist_item",
                     "title": "Documentos",
                     "detail": "Definir emisión de documentos (boleta/factura).",
-                    "links": []
+                    "links": [],
+                    "evidence": ["Resolución Exenta N° 74 - Modificación a la Ley sobre Impuestos a las Ventas y Servicios"]
                 }
             ]
         },
@@ -139,7 +142,8 @@
                     "detail": "Debes iniciar actividades y obtener RUT.",
                     "links": [
                         "https://homer.sii.cl/"
-                    ]
+                    ],
+                    "evidence": ["Decreto Ley N° 830, Código Tributario (Art. 68)"]
                 }
             ]
         },

@@ -20,6 +20,7 @@ export interface RuleAction {
     title?: string;
     detail?: string;
     links?: string[];
+    evidence?: string[];
 }
 
 export interface Rule {
@@ -40,6 +41,8 @@ export interface EvaluatedResult {
     next_questions: string[];
     checklist: ChecklistItem[];
     warnings: WarningItem[];
+    applied_rules: string[];
+    sources: string[];
 }
 
 export class RuleEngine {
@@ -48,6 +51,8 @@ export class RuleEngine {
             next_questions: [],
             checklist: [],
             warnings: [],
+            applied_rules: [],
+            sources: []
         };
 
         const sortedRules = [...ruleset.rules].sort((a, b) => b.priority - a.priority);
@@ -64,7 +69,11 @@ export class RuleEngine {
             }
 
             if (matches) {
+                result.applied_rules.push(rule.id);
                 for (const action of rule.then) {
+                    if (action.evidence && Array.isArray(action.evidence)) {
+                        result.sources.push(...action.evidence);
+                    }
                     if (action.type === 'ask' && action.message) {
                         result.next_questions.push(action.message);
                     } else if (action.type === 'add_checklist_item' && action.title && action.detail) {
@@ -83,6 +92,9 @@ export class RuleEngine {
                 }
             }
         }
+
+        // Deduplicate sources
+        result.sources = [...new Set(result.sources)];
 
         return result;
     }
