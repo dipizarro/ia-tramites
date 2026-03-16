@@ -25,6 +25,11 @@ export type WarningItem = z.infer<typeof warningItemSchema>;
 export const chatResponseSchema = z.object({
     reply: z.string(),
     slots: z.record(z.any()).optional(),
+    ruleset: z.object({
+        id: z.string(),
+        version: z.string(),
+        updated_at: z.string()
+    }).optional(),
     next_questions: z.array(z.string()).optional(),
     checklist: z.array(checklistItemSchema).optional(),
     warnings: z.array(warningItemSchema).optional()

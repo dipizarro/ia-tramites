@@ -1,17 +1,19 @@
 import { ChatRequest, ChatResponse } from '../domain/chat.schema';
-import { ISessionStore, InMemorySessionStore, SessionState } from '../domain/session-store';
+import { ISessionStore } from '../domain/session-store';
+import { SqlServerSessionStore } from '../infrastructure/sqlserver-session-store';
 import { SlotExtractor } from '../domain/slot-extractor';
-import { RuleEngine } from '../domain/rules/engine';
+import { RuleEngine, RuleSet } from '../domain/rules/engine';
 import { RuleSetLoader } from '../infrastructure/ruleset-loader';
+import { config } from '../infrastructure/config';
 
 export class ChatService {
     private sessionStore: ISessionStore;
     private slotExtractor: SlotExtractor;
     private ruleEngine: RuleEngine;
-    private ruleset: any;
+    private ruleset: RuleSet;
 
     constructor() {
-        this.sessionStore = new InMemorySessionStore();
+        this.sessionStore = new SqlServerSessionStore(config.sqlConnectionString);
         this.slotExtractor = new SlotExtractor();
         this.ruleEngine = new RuleEngine();
         this.ruleset = RuleSetLoader.load('ruleset.cl.formaliza.mvp.json');
@@ -41,9 +43,18 @@ export class ChatService {
         return {
             reply,
             slots: newSlots,
+            ruleset: {
+                id: this.ruleset.ruleset_id,
+                version: this.ruleset.version,
+                updated_at: this.ruleset.updated_at
+            },
             next_questions: evalResult.next_questions,
             checklist: evalResult.checklist,
             warnings: evalResult.warnings
         };
+    }
+
+    public async getSession(sessionId: string) {
+        return await this.sessionStore.get(sessionId);
     }
 }

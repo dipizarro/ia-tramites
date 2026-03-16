@@ -1,4 +1,7 @@
 {
+    "ruleset_id": "cl.formaliza.mvp",
+    "version": "1.0.0",
+    "updated_at": "2026-03-04T12:00:00Z",
     "rules": [
         {
             "id": "ask_activity_type",

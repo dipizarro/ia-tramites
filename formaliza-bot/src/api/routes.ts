@@ -9,6 +9,22 @@ export async function setupRoutes(fastify: FastifyInstance) {
         return { status: 'ok' };
     });
 
+    fastify.get('/debug/session/:sessionId', async (request: FastifyRequest<{ Params: { sessionId: string } }>, reply: FastifyReply) => {
+        try {
+            const { sessionId } = request.params;
+            const session = await chatService.getSession(sessionId);
+
+            if (!session) {
+                return reply.status(404).send({ error: 'Session not found' });
+            }
+
+            return reply.send(session);
+        } catch (error) {
+            request.log.error(error, 'Error fetching session');
+            return reply.status(500).send({ error: 'Internal Server Error' });
+        }
+    });
+
     fastify.post('/chat', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const parsedBody = chatRequestSchema.safeParse(request.body);

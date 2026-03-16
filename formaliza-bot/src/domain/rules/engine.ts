@@ -30,6 +30,9 @@ export interface Rule {
 }
 
 export interface RuleSet {
+    ruleset_id: string;
+    version: string;
+    updated_at: string;
     rules: Rule[];
 }
 
