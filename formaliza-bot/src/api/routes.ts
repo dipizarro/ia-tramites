@@ -38,7 +38,7 @@ export async function setupRoutes(fastify: FastifyInstance) {
             // Reprocesar las reglas estaticamente usando el motor que tiene chatService mediante helper si fuese un caso de uso.
             // Aqui podemos inyectar un metodo buildSummary en chat service o recrearlo:
             const summary = await chatService.buildSummaryForSession(session);
-            
+
             return reply.send(summary);
         } catch (error) {
             request.log.error(error, 'Error building summary');
